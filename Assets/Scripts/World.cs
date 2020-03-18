@@ -6,6 +6,154 @@ public class World : MonoBehaviour
 {
     [Header("World Settings")]
     public float surfaceLevel = 0;
+    public NoiseSettings noiseSettings;
+    public Vector3Int worldScale = Vector3Int.zero;
+    public Vector3Int chunkSize = Vector3Int.zero;
+    
+    [Header("Chunk Management")]
+    public Transform player;
+    public Chunk chunkPrefab;
+    public int viewDistance;
+
+
+    [Header("Editor & Debugging")]
+    public bool autoRefresh;
+    public bool debug;
+
+    [HideInInspector]
+    public bool noiseSettingsFoldout;
+    [HideInInspector]
+    public bool chunkSettingsFoldout;
+
+    //Chunk management
+    List<Chunk> chunkHolder;
+    List<Chunk> existingChunks;
+
+
+    Ray ScreenRay => Camera.main.ScreenPointToRay(Input.mousePosition);
+
+    void Start()
+    {
+        //Initialize "buffers"
+        chunkHolder = new List<Chunk>();
+        existingChunks = new List<Chunk>();
+    }
+
+    void Update()
+    {
+        //Check which chunk needs to be loaded or unloaded
+    }
+
+    #region World Methods
+
+    public void RefreshWorld()
+    {
+        if (Application.isPlaying)
+        {
+            ClearWorld();
+        }
+    }
+
+    void ClearWorld()
+    {
+        for (int i = 0; i < chunkHolder.Count; i++)
+            Destroy(chunkHolder[i].gameObject);
+
+        for (int i = 0; i < existingChunks.Count; i++)
+            Destroy(existingChunks[i].gameObject);
+
+        chunkHolder.Clear();
+        existingChunks.Clear();
+    }
+
+    #endregion
+
+    #region Chunk Methods
+
+    void GenerateChunk(Vector3Int position)
+    {
+        Chunk chunk = Instantiate(chunkPrefab, transform);
+
+        chunk.Initialize(surfaceLevel, chunkSize, position, worldScale, noiseSettings);
+        chunk.GenerateMesh();
+
+        existingChunks.Add(chunk);
+        chunkHolder.Add(chunk);
+    }
+
+    void RelocateChunk(Chunk chunk, Vector3Int to)
+    {
+        chunk.CurrentPosition = to;
+        ActivateChunk(chunk);
+    }
+
+    void ActivateChunk(Chunk chunk)
+    {
+        Debug.Assert(chunk.IsActive == false, "Chunk is already active!");
+        chunk.IsActive = true;
+        chunkHolder.Add(chunk);
+    }
+
+    void DeactivateChunk(Chunk chunk)
+    {
+        Debug.Assert(chunk.IsActive == true, "Cannot deactive a chunk that is already sleeping!");
+        chunk.IsActive = false;
+        chunkHolder.Remove(chunk);
+    }
+
+    #endregion
+
+    #region Helpers
+
+    bool IsInView(Bounds chunkBound, Camera camera)
+    {
+        Plane[] cameraPlanes = GeometryUtility.CalculateFrustumPlanes(camera);
+        return GeometryUtility.TestPlanesAABB(cameraPlanes, chunkBound);
+    }
+
+    Vector3Int PointToGrid(Vector3 point, Vector3Int cellSize)
+    {
+        Vector3Int snap = new Vector3Int();
+        snap.x = Mathf.FloorToInt(point.x / (cellSize.x - 1)) * (cellSize.x - 1);
+        snap.y = Mathf.FloorToInt(point.y / (cellSize.y - 1)) * (cellSize.y - 1);
+        snap.z = Mathf.FloorToInt(point.z / (cellSize.z - 1)) * (cellSize.z - 1);
+
+        return snap;
+    }
+
+    #endregion
+
+    #region Debug
+
+    public int GetChunksOnScreen()
+    {
+        return chunkHolder.Count;
+    }
+
+    public int GetChunksCreated()
+    {
+        return existingChunks.Count;
+    }
+
+    void OnDrawGizmos()
+    {
+        if (debug)
+        {
+            Gizmos.color = Color.red;
+            for (int x = 0; x < worldScale.x; x++)
+            for (int y = 0; y < worldScale.y; y++)
+            for (int z = 0; z < worldScale.z; z++)
+                Gizmos.DrawWireCube(new Vector3(((x) * (chunkSize.x - 1)) + 7.5f,
+                                                ((y) * (chunkSize.y - 1)),
+                                                ((z) * (chunkSize.z - 1)) + 7.5f), new Vector3(15, 15, 15));
+        }
+    }
+
+    #endregion
+
+    /*
+    [Header("World Settings")]
+    public float surfaceLevel = 0;
     public Vector3Int worldScale = Vector3Int.zero;
     public Vector3Int chunkSize = Vector3Int.zero;
     public Chunk chunkPrefab;
@@ -319,96 +467,23 @@ public class World : MonoBehaviour
     }
 
 
-    //private void OnDrawGizmos()
-    //{
-
-    //    Gizmos.color = Color.red;
-    //    for (int x = 0; x < worldScale.x; x++)
-    //    {
-    //        for (int y = 0; y < worldScale.y; y++)
-    //        {
-    //            for (int z = 0; z < worldScale.z; z++)
-    //            {
-    //                Gizmos.DrawWireCube(new Vector3(((x) * (chunkSize.x-1))+7.5f, 
-    //                                                ((y) * (chunkSize.y-1)),
-    //                                                ((z) * (chunkSize.z-1))+ 7.5f), new Vector3(15, 15, 15));
-    //            }
-    //        }
-    //    }
-    //}
-}
-
-/*
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-
-public class World : MonoBehaviour
-{
-    public float surfaceLevel = 0;
-    public Vector3Int worldSize = Vector3Int.zero;
-    public Vector3Int chunkSize = Vector3Int.zero;
-    public GameObject chunkPrefab;
-
-    GameObject[] chunks;
-
-    // Start is called before the first frame update
-    void Start()
+    private void OnDrawGizmos()
     {
-        chunks = new GameObject[(int)(worldSize.x * worldSize.y * worldSize.z)];
 
-        RefreshWorld();
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-    }
-
-    [ContextMenu("Refresh World")]
-    void RefreshWorld()
-    {
-        if (chunks.Length > 0)
-            ClearChunks();
-
-        chunks = new GameObject[(int)(worldSize.x * worldSize.y * worldSize.z)];
-
-        for (int x = 0; x < worldSize.x; x++)
+        Gizmos.color = Color.red;
+        for (int x = 0; x < worldScale.x; x++)
         {
-            for (int y = 0; y < worldSize.y; y++)
+            for (int y = 0; y < worldScale.y; y++)
             {
-                for (int z = 0; z < worldSize.z; z++)
+                for (int z = 0; z < worldScale.z; z++)
                 {
-                    Vector3 currentPosition = new Vector3(x, y, z);
-                    Chunk newChunk = new Chunk(surfaceLevel, chunkSize, currentPosition, worldSize);
-
-                    GameObject chunk = Instantiate(chunkPrefab, transform);
-                    chunk.transform.position = new Vector3(x * (chunkSize.x - 1), y * (chunkSize.y - 1), z * (chunkSize.z - 1));
-                    chunk.GetComponent<MeshFilter>().sharedMesh = newChunk.GetMesh();
-                    chunk.GetComponent<MeshCollider>().sharedMesh = newChunk.GetMesh();
+                    Gizmos.DrawWireCube(new Vector3(((x) * (chunkSize.x-1))+7.5f, 
+                                                    ((y) * (chunkSize.y-1)),
+                                                    ((z) * (chunkSize.z-1))+ 7.5f), new Vector3(15, 15, 15));
                 }
             }
         }
     }
 
-    void GetVoxel(int x, int y, int z)
-    {
-
-    }
-
-    Chunk ChunkThatContains(int x, int y, int z)
-    {
-        int ix = x / worldSize.x;
-        int iy = y / worldSize.y;
-        int iz = z / worldSize.z;
-
-        return chunks[ix + iy + iz];
-    }
-
-    void ClearChunks()
-    {
-        foreach (var chunk in chunks)
-            Destroy(chunk);
-    }
+    */
 }
-*/

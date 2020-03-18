@@ -18,7 +18,6 @@ public class WorldEditor : Editor
             world.RefreshWorld();
 
         DrawNoiseSettingsEditor(world.RefreshWorld, ref world.noiseSettingsFoldout, ref noiseEditor);
-        DrawChunkManagerSettingsEditor(ref world.chunkSettingsFoldout, ref noiseEditor);
     }
 
     void DrawNoiseSettingsEditor(System.Action onSettingsUpdated, ref bool foldout, ref Editor editor)
@@ -46,24 +45,6 @@ public class WorldEditor : Editor
             }
         }
     }
-
-    void DrawChunkManagerSettingsEditor(ref bool foldout, ref Editor editor)
-    {
-        Object settings = world.chunkManager;
-        if (settings == null)
-            return;
-
-        foldout = EditorGUILayout.InspectorTitlebar(foldout, settings);
-        using (var check = new EditorGUI.ChangeCheckScope())
-        {
-            if (foldout)
-            {
-                CreateCachedEditor(settings, null, ref editor);
-                editor.OnInspectorGUI();
-            }
-        }
-    }
-
 
     void OnEnable()
     {

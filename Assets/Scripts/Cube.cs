@@ -58,7 +58,6 @@ public class Cube
         return v1Pos + (t * (v2Pos - v1Pos));
     }
 
-    //Non dovrebbe servirmi, forse si forse no, si vedrà
     public static Vector3[] corners = new Vector3[]
     {
         new Vector3(0, 0, 0), //0
@@ -70,9 +69,4 @@ public class Cube
         new Vector3(1, 1, 1), //6
         new Vector3(1, 0, 1)  //7
     };
-
-    Vector3 GetCorner(int index, Vector3 position)
-    {
-        return corners[index] + position;
-    }
 }
