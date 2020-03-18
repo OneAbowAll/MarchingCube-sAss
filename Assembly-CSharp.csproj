@@ -68,6 +68,7 @@
     <Compile Include="Assets\Scripts\FlyCameraController.cs" />
     <Compile Include="Assets\Scripts\Include\Perlin.cs" />
     <Compile Include="Assets\Scripts\Include\Table.cs" />
+    <Compile Include="Assets\Scripts\MarchingJob.cs" />
     <Compile Include="Assets\Scripts\NoiseSettings.cs" />
     <Compile Include="Assets\Scripts\Tests\TestCube.cs" />
     <Compile Include="Assets\Scripts\World.cs" />

@@ -31,6 +31,9 @@ public class Chunk : MonoBehaviour
         get => currentPosition;
         set {
             transform.position = currentPosition = value;
+
+            if(voxelValues != null)
+                GenerateValueGrid();
         }
     }
     
@@ -40,10 +43,12 @@ public class Chunk : MonoBehaviour
         set{
             isActive = value;
             if (isActive)
-                GenerateMesh();
+            {
+                if (mesh != null)
+                    GenerateMesh();
+            }
             else
                 UpdateSharedMesh(null);
-
         }
     }
 
@@ -107,6 +112,7 @@ public class Chunk : MonoBehaviour
             {
                 for (int z = 0; z < chunkSize.z - 1; z++)
                 {
+
                     float[] cubeValues = new float[8];
                     for (int i = 0; i < 8; i++)
                     {
@@ -132,6 +138,9 @@ public class Chunk : MonoBehaviour
         mesh.triangles = triangles.ToArray();
         mesh.RecalculateBounds();
         mesh.RecalculateNormals();
+        mesh.Optimize();
+        mesh.OptimizeIndexBuffers();
+        mesh.OptimizeReorderVertexBuffer();
 
         UpdateSharedMesh(mesh);
     }

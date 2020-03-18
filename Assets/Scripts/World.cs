@@ -1,6 +1,9 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System.Diagnostics;
+using System;
+using Debug = UnityEngine.Debug;
 
 public class World : MonoBehaviour
 {
@@ -9,8 +12,9 @@ public class World : MonoBehaviour
     public NoiseSettings noiseSettings;
     public Vector3Int worldScale = Vector3Int.zero;
     public Vector3Int chunkSize = Vector3Int.zero;
-    
+
     [Header("Chunk Management")]
+    public Camera playerCamera;
     public Transform player;
     public Chunk chunkPrefab;
     public int viewDistance;
@@ -26,7 +30,9 @@ public class World : MonoBehaviour
     public bool chunkSettingsFoldout;
 
     //Chunk management
-    List<Chunk> chunkHolder;
+    //List<Chunk> chunkHolder;
+    Dictionary<Vector3Int, Chunk> chunkHolder;
+    Queue<Chunk> reusableChunks;
     List<Chunk> existingChunks;
 
 
@@ -35,14 +41,123 @@ public class World : MonoBehaviour
     void Start()
     {
         //Initialize "buffers"
-        chunkHolder = new List<Chunk>();
+        chunkHolder = new Dictionary<Vector3Int, Chunk>();
+        reusableChunks = new Queue<Chunk>();
         existingChunks = new List<Chunk>();
+
+        GenerateChunk(Vector3Int.zero);
     }
 
     void Update()
     {
         //Check which chunk needs to be loaded or unloaded
+        StartCoroutine(Run());
     }
+
+    IEnumerator Run()
+    {
+
+        Vector3Int playerInGrid = PointInGrid(player.position, chunkSize); playerInGrid.y = 0;
+
+        //Remove unseen Chunks
+        for (int i = 0; i < existingChunks.Count; i++)
+        {
+            float distance = Vector3Int.Distance(existingChunks[i].CurrentPosition, playerInGrid);
+            Bounds chunkBound = CalculateBoundAt(existingChunks[i].CurrentPosition);
+            if (!IsInView(chunkBound, playerCamera) && existingChunks[i].CurrentPosition != playerInGrid)
+            {
+                DeactivateChunk(existingChunks[i]);
+            }
+        }
+
+        yield return null;
+
+        //Load seen chunks
+        for (int x = -viewDistance; x <= viewDistance; x++)
+        {
+            for (int z = -viewDistance; z <= viewDistance; z++)
+            {
+                Vector3Int chunkPosition = playerInGrid + (new Vector3Int(x, 0, z)*(chunkSize-Vector3Int.one));
+
+                Bounds chunkBound = CalculateBoundAt(chunkPosition);
+
+                if (chunkHolder.ContainsKey(chunkPosition))
+                    continue;
+                
+                if (IsInView(chunkBound, playerCamera))
+                {
+                    if (reusableChunks.Count > 0)
+                    {
+                        Chunk reusableChunk = reusableChunks.Dequeue();
+                        RelocateChunk(reusableChunk, chunkPosition);
+                    }
+                    else
+                    {
+                        GenerateChunk(chunkPosition);
+                    }
+                }
+                yield return null;
+            }
+        }
+
+    }
+
+    //IEnumerator ChunkManagement()
+    //{
+    //    while (true)
+    //    {
+    //        Vector3Int playerInGrid = Vector3Int.zero; //PointInGrid(player.position, chunkSize); playerInGrid.y = 0;
+
+    //        for (int x = -viewDistance; x <= viewDistance; x++)
+    //        {
+    //            for (int z = -viewDistance; z <= viewDistance; z++)
+    //            {
+    //                Vector3Int chunkPosition = new Vector3Int(playerInGrid.x + (x * (chunkSize.x - 1)),
+    //                                                            0,
+    //                                                            playerInGrid.z + (z * (chunkSize.z - 1)));
+
+    //                Bounds chunkBound = CalculateBoundAt(chunkPosition);
+
+    //                if (/*IsInView(chunkBound, Camera.main)*/ true)
+    //                {
+
+    //                    //Controlla se un chunk esiste in quella posizione e attivalo se lo trovi
+    //                    Chunk possibileChunk = existingChunks.Find(chunk => chunk.CurrentPosition == chunkPosition);
+    //                    if (possibileChunk != null)
+    //                    {
+    //                        if (possibileChunk.IsActive)
+    //                            continue;
+    //                        else
+    //                        {
+    //                            ActivateChunk(possibileChunk);
+    //                            continue;
+    //                        }
+    //                    }
+    //                    else
+    //                    {
+    //                        //In caso contrario prendine uno inutilizzato e spostaleo
+    //                        possibileChunk = existingChunks.FindLast(chunk => !chunk.IsActive);
+    //                        if (possibileChunk != null)
+    //                        {
+
+    //                            RelocateChunk(possibileChunk, chunkPosition);
+    //                            continue;
+    //                        }
+    //                        else
+    //                        {
+    //                            //E se niente funziona generane uno da zero
+    //                            GenerateChunk(chunkPosition);
+    //                            continue;
+    //                        }
+    //                    }
+
+    //                    yield return null;
+    //                }
+    //            }
+    //        }
+
+    //    }
+    //}
 
     #region World Methods
 
@@ -56,9 +171,6 @@ public class World : MonoBehaviour
 
     void ClearWorld()
     {
-        for (int i = 0; i < chunkHolder.Count; i++)
-            Destroy(chunkHolder[i].gameObject);
-
         for (int i = 0; i < existingChunks.Count; i++)
             Destroy(existingChunks[i].gameObject);
 
@@ -78,7 +190,7 @@ public class World : MonoBehaviour
         chunk.GenerateMesh();
 
         existingChunks.Add(chunk);
-        chunkHolder.Add(chunk);
+        chunkHolder.Add(position, chunk);
     }
 
     void RelocateChunk(Chunk chunk, Vector3Int to)
@@ -89,16 +201,17 @@ public class World : MonoBehaviour
 
     void ActivateChunk(Chunk chunk)
     {
-        Debug.Assert(chunk.IsActive == false, "Chunk is already active!");
         chunk.IsActive = true;
-        chunkHolder.Add(chunk);
+        chunkHolder.Add(chunk.CurrentPosition, chunk);
+        existingChunks.Add(chunk);
     }
 
     void DeactivateChunk(Chunk chunk)
     {
-        Debug.Assert(chunk.IsActive == true, "Cannot deactive a chunk that is already sleeping!");
         chunk.IsActive = false;
-        chunkHolder.Remove(chunk);
+        reusableChunks.Enqueue(chunk);
+        chunkHolder.Remove(chunk.CurrentPosition);
+        existingChunks.Remove(chunk);
     }
 
     #endregion
@@ -111,7 +224,13 @@ public class World : MonoBehaviour
         return GeometryUtility.TestPlanesAABB(cameraPlanes, chunkBound);
     }
 
-    Vector3Int PointToGrid(Vector3 point, Vector3Int cellSize)
+    Bounds CalculateBoundAt(Vector3Int position)
+    {
+        Vector3 size = chunkSize - Vector3.one;
+        return new Bounds(position + (size / 2), size);
+    }
+
+    Vector3Int PointInGrid(Vector3 point, Vector3Int cellSize)
     {
         Vector3Int snap = new Vector3Int();
         snap.x = Mathf.FloorToInt(point.x / (cellSize.x - 1)) * (cellSize.x - 1);
@@ -127,16 +246,17 @@ public class World : MonoBehaviour
 
     public int GetChunksOnScreen()
     {
-        return chunkHolder.Count;
+        return existingChunks.Count;
     }
 
     public int GetChunksCreated()
     {
-        return existingChunks.Count;
+        return chunkHolder.Count;
     }
 
     void OnDrawGizmos()
     {
+        
         if (debug)
         {
             Gizmos.color = Color.red;

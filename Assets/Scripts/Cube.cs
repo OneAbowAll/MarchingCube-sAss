@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Unity.Collections;
 
 public class Cube
 {
@@ -39,6 +40,23 @@ public class Cube
         }
         
         return vertices.ToArray();
+    }
+
+    public void GenerateVertices(out NativeArray<Vector3> vertices)
+    {
+        int[] edges = Table.triangles[cubeIndex];
+        vertices = new NativeArray<Vector3>(edges.Length, Allocator.Temp);
+
+        for (int i = 0; i < edges.Length; i++)
+        {
+            int indexA = Table.cornerFromEdge[edges[i]][0];
+            int indexB = Table.cornerFromEdge[edges[i]][1];
+
+
+            Vector3 edgePosition = interpolateVerts(corners[indexA], values[indexA], corners[indexB], values[indexB]); //(corners[indexA] + corners[indexB]) / 2;
+            vertices[i] = edgePosition + positionRelativeToV0;
+            //vertices.Add(edgePosition + positionRelativeToV0);
+        }
     }
 
     int CalculateIndex()
