@@ -17,6 +17,17 @@ public class WorldEditor : Editor
         if (GUILayout.Button("Refresh World"))
             world.RefreshWorld();
 
+        using (var check = new EditorGUI.ChangeCheckScope())
+        {
+            if (check.changed)
+            {
+                if (world.autoRefresh)
+                {
+                    world.RefreshWorld();
+                }
+            }
+        }
+
         DrawNoiseSettingsEditor(world.RefreshWorld, ref world.noiseSettingsFoldout, ref noiseEditor);
     }
 

@@ -2,9 +2,11 @@ ScriptsOnlyBuild:
   usedScripts:
     Assembly-CSharp.dll:
     - Chunk
+    - ChunkCubeXCube
     - DebugUI
     - FlyCameraController
     - NoiseSettings
+    - TestCubeShader
     - World
     Unity.RenderPipelines.Core.Runtime.dll:
     - UnityEngine.Rendering.UI.DebugUIHandlerBitField
@@ -86,9 +88,9 @@ ScriptsOnlyBuild:
       Script: {instanceID: 0}
     - Class: 48
       Script: {instanceID: 0}
-    - Class: 54
-      Script: {instanceID: 0}
     - Class: 64
+      Script: {instanceID: 0}
+    - Class: 72
       Script: {instanceID: 0}
     - Class: 81
       Script: {instanceID: 0}
@@ -129,76 +131,78 @@ ScriptsOnlyBuild:
     - Class: 114
       Script: {instanceID: 12356}
     - Class: 114
-      Script: {instanceID: 12462}
+      Script: {instanceID: 12372}
     - Class: 114
-      Script: {instanceID: 12654}
+      Script: {instanceID: 12428}
     - Class: 114
-      Script: {instanceID: 12696}
+      Script: {instanceID: 12466}
     - Class: 114
-      Script: {instanceID: 12752}
+      Script: {instanceID: 12658}
     - Class: 114
-      Script: {instanceID: 12836}
+      Script: {instanceID: 12700}
     - Class: 114
-      Script: {instanceID: 12846}
+      Script: {instanceID: 12756}
     - Class: 114
-      Script: {instanceID: 13044}
+      Script: {instanceID: 12842}
     - Class: 114
-      Script: {instanceID: 13098}
+      Script: {instanceID: 12852}
     - Class: 114
-      Script: {instanceID: 13124}
+      Script: {instanceID: 13050}
     - Class: 114
-      Script: {instanceID: 13226}
+      Script: {instanceID: 13104}
     - Class: 114
-      Script: {instanceID: 13242}
+      Script: {instanceID: 13130}
     - Class: 114
-      Script: {instanceID: 13260}
+      Script: {instanceID: 13232}
     - Class: 114
-      Script: {instanceID: 13388}
+      Script: {instanceID: 13248}
     - Class: 114
-      Script: {instanceID: 13448}
+      Script: {instanceID: 13266}
     - Class: 114
-      Script: {instanceID: 13468}
+      Script: {instanceID: 13394}
     - Class: 114
-      Script: {instanceID: 13584}
+      Script: {instanceID: 13454}
     - Class: 114
-      Script: {instanceID: 13612}
+      Script: {instanceID: 13474}
     - Class: 114
-      Script: {instanceID: 13620}
+      Script: {instanceID: 13590}
     - Class: 114
-      Script: {instanceID: 13906}
+      Script: {instanceID: 13618}
     - Class: 114
-      Script: {instanceID: 13922}
+      Script: {instanceID: 13626}
     - Class: 114
-      Script: {instanceID: 13970}
+      Script: {instanceID: 13912}
     - Class: 114
-      Script: {instanceID: 14190}
+      Script: {instanceID: 13928}
     - Class: 114
-      Script: {instanceID: 14366}
+      Script: {instanceID: 13978}
     - Class: 114
-      Script: {instanceID: 14410}
+      Script: {instanceID: 14198}
     - Class: 114
-      Script: {instanceID: 14486}
+      Script: {instanceID: 14374}
     - Class: 114
-      Script: {instanceID: 14604}
+      Script: {instanceID: 14418}
     - Class: 114
-      Script: {instanceID: 14606}
+      Script: {instanceID: 14494}
     - Class: 114
-      Script: {instanceID: 14634}
+      Script: {instanceID: 14612}
     - Class: 114
-      Script: {instanceID: 14654}
+      Script: {instanceID: 14614}
     - Class: 114
-      Script: {instanceID: 14656}
+      Script: {instanceID: 14642}
     - Class: 114
-      Script: {instanceID: 14688}
+      Script: {instanceID: 14662}
     - Class: 114
-      Script: {instanceID: 14766}
+      Script: {instanceID: 14664}
     - Class: 114
-      Script: {instanceID: 14772}
+      Script: {instanceID: 14696}
+    - Class: 114
+      Script: {instanceID: 14774}
+    - Class: 114
+      Script: {instanceID: 14780}
     - Class: 115
       Script: {instanceID: 0}
     - Class: 128
-      Script: {instanceID: 0}
-    - Class: 136
       Script: {instanceID: 0}
     - Class: 157
       Script: {instanceID: 0}
@@ -487,10 +491,22 @@ ScriptsOnlyBuild:
     className: ControlPlayableAsset
   - hash:
       serializedVersion: 2
+      Hash: 277f42f6865e24c3ec3a8c3c2b12c76c
+    assemblyName: Assembly-CSharp.dll
+    namespaceName: 
+    className: ChunkCubeXCube
+  - hash:
+      serializedVersion: 2
       Hash: b8a5e8091ab0b8861d2add371082c5e0
     assemblyName: Unity.TextMeshPro.dll
     namespaceName: TMPro
     className: TMP_SpriteAsset
+  - hash:
+      serializedVersion: 2
+      Hash: a446b136fa714ac0e2b490297c470611
+    assemblyName: Assembly-CSharp.dll
+    namespaceName: 
+    className: TestCubeShader
   - hash:
       serializedVersion: 2
       Hash: c3d3430df9e3ea95e3e3d587961390fb
@@ -559,7 +575,13 @@ ScriptsOnlyBuild:
     className: SignalTrack
   - hash:
       serializedVersion: 2
-      Hash: f747ba171eb6bc8d7b5d0cf6fbd06951
+      Hash: 277f42f6865e24c3ec3a8c3c2b12c76c
+    assemblyName: Assembly-CSharp.dll
+    namespaceName: 
+    className: TestChunk
+  - hash:
+      serializedVersion: 2
+      Hash: d05f9636aae58332142df5c912b7e922
     assemblyName: Assembly-CSharp.dll
     namespaceName: 
     className: World
@@ -1052,4 +1074,4 @@ ScriptsOnlyBuild:
   platform: 19
   scenePathNames:
   - Assets/Scenes/SampleScene.unity
-  playerPath: C:/Users/Bubble/Desktop/MarchingCubesUpdatedMaNonProprio/MarchingCubesssss.exe
+  playerPath: C:/Users/Bubble/Desktop/marchingCubeShaderYHEEE/MarchingCubesssss.exe

@@ -1,0 +1,40 @@
+﻿// Each #kernel tells which function to compile; you can have many kernels
+#pragma kernel MarchCube
+#include "ReferenceTable.compute"
+
+struct Triangle {
+	float3 a;
+	float3 b;
+	float3 c;
+};
+
+int cubeIndex;
+AppendStructuredBuffer<Triangle> triangles;
+
+void GetCubeTriangles(int index)
+{
+	for (int i = 0; triangulation[index][i] != -1; i += 3) {
+		// Get indices of corner points A and B for each of the three edges
+		// of the cube that need to be joined to form the triangle.
+		int a0 = cornerIndexAFromEdge[triangulation[index][i]];
+		int b0 = cornerIndexBFromEdge[triangulation[index][i]];
+
+		int a1 = cornerIndexAFromEdge[triangulation[index][i + 1]];
+		int b1 = cornerIndexBFromEdge[triangulation[index][i + 1]];
+
+		int a2 = cornerIndexAFromEdge[triangulation[index][i + 2]];
+		int b2 = cornerIndexBFromEdge[triangulation[index][i + 2]];
+
+		Triangle tri;
+		tri.a = (corners[a0] + corners[b0]) / 2;
+		tri.b = (corners[a1] + corners[b1]) / 2;
+		tri.c = (corners[a2] + corners[b2]) / 2;
+		triangles.Append(tri);
+	}
+}
+
+[numthreads(1, 1, 1)]
+void MarchCube(uint3 id : SV_DispatchThreadID)
+{
+	GetCubeTriangles(cubeIndex);
+}

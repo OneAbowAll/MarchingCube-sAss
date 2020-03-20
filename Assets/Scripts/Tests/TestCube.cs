@@ -42,21 +42,6 @@ public class TestCube : MonoBehaviour
             triangles.Add(t);
         }
 
-        //int[] triangleTable = Table.triangles[cubeIndex];
-        //int triangleIndex = 0;
-
-        //foreach (int edge in triangleTable)
-        //{
-        //    int indexA = Table.cornerFromEdge[edge][0];
-        //    int indexB = Table.cornerFromEdge[edge][1];
-
-        //    Vector3 newVertex = Vector3.zero;//(Cube.GetCorner(indexA, offset)+ Cube.GetCorner(indexB, offset)) / 2;
-            
-        //    vertices.Add(newVertex);
-        //    triangles.Add(triangleIndex);
-        //    triangleIndex++;
-        //}
-
         mesh.vertices = vertices.ToArray();
         mesh.triangles = triangles.ToArray();
         mesh.RecalculateNormals();

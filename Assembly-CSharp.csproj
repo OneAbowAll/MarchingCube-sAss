@@ -68,10 +68,15 @@
     <Compile Include="Assets\Scripts\FlyCameraController.cs" />
     <Compile Include="Assets\Scripts\Include\Perlin.cs" />
     <Compile Include="Assets\Scripts\Include\Table.cs" />
-    <Compile Include="Assets\Scripts\MarchingJob.cs" />
     <Compile Include="Assets\Scripts\NoiseSettings.cs" />
+    <Compile Include="Assets\Scripts\Tests\ChunkCubeXCube.cs" />
+    <Compile Include="Assets\Scripts\Tests\TestChunk.cs" />
     <Compile Include="Assets\Scripts\Tests\TestCube.cs" />
+    <Compile Include="Assets\Scripts\Tests\TestCubeShader.cs" />
     <Compile Include="Assets\Scripts\World.cs" />
+    <None Include="Assets\Scripts\Tests\MarchingChunk.compute" />
+    <None Include="Assets\Scripts\Tests\TestMarchCube.compute" />
+    <None Include="Assets\Scripts\Tests\ReferenceTable.compute" />
     <Reference Include="Unity.RenderPipeline.Universal.ShaderLibrary">
       <HintPath>C:/Users/Bubble/Documents/GitHub/MarchingTheCube-sAss/Library/ScriptAssemblies/Unity.RenderPipeline.Universal.ShaderLibrary.dll</HintPath>
     </Reference>

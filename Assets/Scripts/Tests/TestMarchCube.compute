@@ -1,0 +1,77 @@
+﻿// Each #kernel tells which function to compile; you can have many kernels
+#pragma kernel MarchCube
+#include "ReferenceTable.compute"
+
+struct Triangle {
+	float3 a;
+	float3 b;
+	float3 c;
+};
+
+//Input
+float3 chunkSize;
+float isoLevel;
+RWStructuredBuffer<float> values;
+
+//Input Output
+AppendStructuredBuffer<Triangle> triangles;
+
+void GetCubeTriangles(int index, float3 position)
+{	
+	//Get Vertices
+	for (int i = 0; triangulation[index][i] != -1; i += 3) {
+		// Get indices of corner points A and B for each of the three edges
+		// of the cube that need to be joined to form the triangle.
+		int a0 = cornerIndexAFromEdge[triangulation[index][i]];
+		int b0 = cornerIndexBFromEdge[triangulation[index][i]];
+
+		int a1 = cornerIndexAFromEdge[triangulation[index][i + 1]];
+		int b1 = cornerIndexBFromEdge[triangulation[index][i + 1]];
+
+		int a2 = cornerIndexAFromEdge[triangulation[index][i + 2]];
+		int b2 = cornerIndexBFromEdge[triangulation[index][i + 2]];
+
+		Triangle tri;
+		tri.a = ((corners[a0] + corners[b0]) / 2)+position;
+		tri.b = ((corners[a1] + corners[b1]) / 2)+position;
+		tri.c = ((corners[a2] + corners[b2]) / 2)+position;
+		triangles.Append(tri);
+	}
+}
+
+int indexFromCoord(int x, int y, int z) {
+	return z * chunkSize.x * chunkSize.y + y * chunkSize.x + x;
+}
+
+[numthreads(8,8,8)]
+void MarchCube(uint3 id : SV_DispatchThreadID)
+{
+	if (id.x >= chunkSize.x - 1 || id.y >= chunkSize.y - 1 || id.z >= chunkSize.z - 1) {
+		return;
+	}
+
+	float cubeValues[8] =
+	{
+		values[indexFromCoord(id.x, id.y, id.z)],
+		values[indexFromCoord(id.x, id.y + 1, id.z)],
+		values[indexFromCoord(id.x + 1, id.y + 1, id.z)],
+		values[indexFromCoord(id.x + 1, id.y, id.z)],
+		values[indexFromCoord(id.x, id.y, id.z + 1)],
+		values[indexFromCoord(id.x, id.y + 1, id.z + 1)],
+		values[indexFromCoord(id.x + 1, id.y + 1, id.z + 1)],
+		values[indexFromCoord(id.x + 1, id.y, id.z + 1)]
+	};
+
+	//Get Index
+	int cubeIndex = 0;
+	if (cubeValues[0] < isoLevel) cubeIndex |= 1;
+	if (cubeValues[1] < isoLevel) cubeIndex |= 2;
+	if (cubeValues[2] < isoLevel) cubeIndex |= 4;
+	if (cubeValues[3] < isoLevel) cubeIndex |= 8;
+	if (cubeValues[4] < isoLevel) cubeIndex |= 16;
+	if (cubeValues[5] < isoLevel) cubeIndex |= 32;
+	if (cubeValues[6] < isoLevel) cubeIndex |= 64;
+	if (cubeValues[7] < isoLevel) cubeIndex |= 128;
+
+	GetCubeTriangles(cubeIndex, float3(id.x, id.y, id.z));
+}

@@ -13,9 +13,9 @@ MonoBehaviour:
   m_Name: worldDefault
   m_EditorClassIdentifier: 
   offsetPosition: {x: 0, y: 0, z: 0}
-  frequency: 3
-  amplitude: 26.76
-  minValue: 2
-  octaves: 2
-  roughness: 0
-  persistence: 0.2
+  frequency: 1
+  amplitude: 12
+  minValue: 0
+  octaves: 3
+  roughness: 1.8
+  persistence: 0.6

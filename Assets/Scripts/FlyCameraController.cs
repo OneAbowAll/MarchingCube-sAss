@@ -3,8 +3,6 @@
 [RequireComponent(typeof(Camera))]
 public class FlyCameraController : MonoBehaviour
 {
-    Rigidbody body;
-
     public float acceleration = 50; // how fast you accelerate
     public float accSprintMultiplier = 4; // how much faster you go when "sprinting"
     public float lookSensitivity = 1; // mouse look sensitivity
@@ -30,11 +28,6 @@ public class FlyCameraController : MonoBehaviour
 
     void OnDisable() => Focused = false;
 
-    private void Awake()
-    {
-        body = GetComponent<Rigidbody>();
-    }
-
     void Update()
     {
         // Input
@@ -46,10 +39,6 @@ public class FlyCameraController : MonoBehaviour
         // Physics
         velocity = Vector3.Lerp(velocity, Vector3.zero, dampingCoefficient * Time.deltaTime);
         transform.position += velocity * Time.deltaTime;
-
-        //Enable and disable rb
-        if (Input.GetKeyDown(KeyCode.F))
-            body.isKinematic = !body.isKinematic;
 
     }
 
